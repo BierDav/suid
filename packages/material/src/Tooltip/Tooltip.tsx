@@ -578,7 +578,7 @@ const Tooltip = $.defineComponent(function Tooltip(inProps) {
       child.removeEventListener("onblur", handleBlur);
     }
 
-    if (!baseProps.followCursor)
+    if (baseProps.followCursor)
       child.addEventListener("mousemove", handleMouseMove);
     else child.removeEventListener("mousemove", handleMouseMove);
   });

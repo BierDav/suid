@@ -2,7 +2,7 @@ import { PopperUnstyledProps, PopperUnstyledTypeMap, TransitionProps } from ".";
 import Portal from "../Portal";
 import { TransitionContext } from "../Transition/TransitionContext";
 import createComponentFactory from "../createComponentFactory";
-import { createPopper } from "@popperjs/core";
+import { createPopper, VirtualElement } from "@popperjs/core";
 import { Instance, Options } from "@popperjs/core";
 import { createLazyMemo } from "@solid-primitives/memo";
 import createElementRef from "@suid/system/createElementRef";
@@ -16,6 +16,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  on,
   onMount,
   Show,
   splitProps,
@@ -84,8 +85,12 @@ export const PopperTooltipRoot = styled("div", {
 })();
 
 const PopperTooltip = function PopperTooltip(
-  inProps: Omit<PopperUnstyledInProps, "keepMounted" | "transition"> & {
+  inProps: Omit<
+    PopperUnstyledInProps,
+    "keepMounted" | "transition" | "anchorEl"
+  > & {
     TransitionProps?: TransitionProps;
+    anchorEl?: VirtualElement | null;
   }
 ) {
   const [props, otherProps] = splitProps(inProps, [
@@ -119,18 +124,14 @@ const PopperTooltip = function PopperTooltip(
       prevDestructor();
     }
 
-    if (!props.anchorEl || !props.open) {
+    const anchorEl = props.anchorEl;
+    if (!anchorEl || !props.open) {
       return undefined;
     }
 
-    const resolvedAnchorEl = resolveAnchorEl(props.anchorEl);
-
     if (process.env.NODE_ENV !== "production") {
-      if (
-        resolvedAnchorEl &&
-        (resolvedAnchorEl as HTMLElement).nodeType === 1
-      ) {
-        const box = resolvedAnchorEl.getBoundingClientRect();
+      if (anchorEl && (anchorEl as HTMLElement).nodeType === 1) {
+        const box = anchorEl.getBoundingClientRect();
 
         if (
           process.env.NODE_ENV !== "test" &&
@@ -181,7 +182,7 @@ const PopperTooltip = function PopperTooltip(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const popper = createPopper(resolveAnchorEl(props.anchorEl)!, tooltip.ref, {
+    const popper = createPopper(anchorEl, tooltip.ref, {
       placement: rtlPlacement,
       ...props.popperOptions,
       modifiers: popperModifiers,
@@ -196,6 +197,15 @@ const PopperTooltip = function PopperTooltip(
     destructors.push(destructor);
     return destructor;
   });
+
+  createEffect(
+    on(
+      () => props.anchorEl?.getBoundingClientRect(),
+      () => {
+        popperInstance.ref?.update();
+      }
+    )
+  );
 
   onMount(() => {
     if (popperInstance.ref) {
@@ -247,11 +257,12 @@ const PopperUnstyled = $.component(function PopperUnstyled({
   // If neither are provided let the Modal take care of choosing the container
   // `ownerDocument` is only available on the client, createLazyMemo makes Popper
   // support ssr as long, as open is false on ssr
+  const resolvedAnchorEl = createMemo(() => resolveAnchorEl(props.anchorEl));
   const container = createLazyMemo(
     () =>
       props.container ??
       (props.anchorEl
-        ? ownerDocument(resolveAnchorEl(props.anchorEl) as HTMLElement).body
+        ? ownerDocument(resolvedAnchorEl() as HTMLElement).body
         : undefined)
   );
 
@@ -272,7 +283,7 @@ const PopperUnstyled = $.component(function PopperUnstyled({
       <Show when={!returnNull()}>
         <Portal disablePortal={props.disablePortal} container={container()}>
           <PopperTooltip
-            anchorEl={props.anchorEl}
+            anchorEl={resolvedAnchorEl()}
             direction={props.direction}
             disablePortal={props.disablePortal}
             modifiers={props.modifiers}
