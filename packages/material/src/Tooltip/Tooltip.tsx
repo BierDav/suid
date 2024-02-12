@@ -277,7 +277,7 @@ const Tooltip = $.defineComponent(function Tooltip(inProps) {
   let touchTimer: NodeJS.Timeout | undefined;
 
   const childNode = resolveFirst(() => baseProps.children);
-  console.log(childNode());
+
   const [openState, setOpenState] = useControlled({
     controlled: () => baseProps.open,
     default: () => false,
@@ -564,7 +564,6 @@ const Tooltip = $.defineComponent(function Tooltip(inProps) {
     if (!baseProps.disableHoverListener) {
       child.addEventListener("mouseover", handleMouseOver);
       child.addEventListener("mouseleave", handleMouseLeave);
-      console.log("mouse event added");
     } else {
       child.removeEventListener("mouseover", handleMouseOver);
       child.removeEventListener("mouseleave", handleMouseLeave);
