@@ -45,12 +45,14 @@ const Grow = $.component(function Grow({ props, otherProps }) {
 
   let timer: ReturnType<typeof globalThis.setTimeout> | undefined;
   onCleanup(() => timer && clearTimeout(timer));
+  const context = useContext(TransitionContext);
 
   return (
     <Transition
-      {...otherProps}
+      in={props.in ?? context?.in}
       appear={props.appear}
-      in={props.in}
+      timeout={props.timeout === "auto" ? undefined : props.timeout}
+      {...otherProps}
       onEnter={() => {
         const node = resolved();
         reflow(node); // So the animation always start from the start.
@@ -72,8 +74,8 @@ const Grow = $.component(function Grow({ props, otherProps }) {
 
         let duration: string | number;
         if (props.timeout === "auto") {
-          duration = theme.transitions.getAutoHeightDuration(node.clientHeight);
-          autoTimeout.current = duration;
+          autoTimeout.current = duration =
+            theme.transitions.getAutoHeightDuration(node.clientHeight);
         } else {
           duration = transitionDuration;
         }
@@ -91,6 +93,7 @@ const Grow = $.component(function Grow({ props, otherProps }) {
         ].join(",");
 
         otherProps.onEnter?.();
+        context?.onEnter?.();
       }}
       onExit={() => {
         const node = resolved();
@@ -129,20 +132,18 @@ const Grow = $.component(function Grow({ props, otherProps }) {
           }),
         ].join(",");
 
-        node.style.opacity = "0";
-        node.style.transform = getScale(0.75);
-
         otherProps.onExit?.();
       }}
-      addEndListener={(next) => {
-        if (props.timeout === "auto") {
+      {...(props.timeout !== "auto" && {
+        addEndListener: (next) => {
           timer = setTimeout(next, autoTimeout.current || 0);
-        }
-        if (otherProps.addEndListener) {
-          otherProps.addEndListener(next);
-        }
+          otherProps.addEndListener?.(next);
+        },
+      })}
+      onExited={() => {
+        otherProps.onExited?.();
+        context?.onExited?.();
       }}
-      timeout={props.timeout === "auto" ? undefined : props.timeout}
     >
       {(state) => {
         const element = resolved();

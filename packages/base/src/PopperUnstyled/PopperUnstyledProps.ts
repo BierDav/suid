@@ -5,7 +5,9 @@ import {
   Options,
   OptionsGeneric,
 } from "@popperjs/core";
+import { SxProps } from "@suid/system";
 import { RefProp } from "@suid/system/createRef";
+import { Theme } from "@suid/system/createTheme";
 import { ElementType, OverrideProps } from "@suid/types";
 import { JSXElement } from "solid-js";
 
@@ -102,6 +104,10 @@ export interface PopperUnstyledTypeMap<P = {}, D extends ElementType = "div"> {
      * @default false
      */
     transition?: boolean;
+    /**
+     * The system prop that allows defining system overrides as well as additional CSS styles.
+     */
+    sx?: SxProps<Theme>;
   };
   props: P & PopperUnstyledTypeMap["selfProps"];
   defaultComponent: D;

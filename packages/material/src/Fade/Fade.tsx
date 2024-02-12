@@ -80,7 +80,7 @@ const Fade = $.component(function Fade({ props, otherProps }) {
             easing: props.easing,
           },
           {
-            mode: "enter",
+            mode: "exit",
           }
         );
         e.style.transition = theme.transitions.create(

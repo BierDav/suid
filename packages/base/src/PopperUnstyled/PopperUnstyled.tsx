@@ -4,11 +4,15 @@ import { TransitionContext } from "../Transition/TransitionContext";
 import createComponentFactory from "../createComponentFactory";
 import { createPopper } from "@popperjs/core";
 import { Instance, Options } from "@popperjs/core";
+import { createLazyMemo } from "@solid-primitives/memo";
 import createElementRef from "@suid/system/createElementRef";
 import createRef from "@suid/system/createRef";
+import { skipProps } from "@suid/system/createStyled";
+import styled from "@suid/system/styled";
 import { InPropsOf } from "@suid/types";
 import ownerDocument from "@suid/utils/ownerDocument";
 import {
+  children,
   createEffect,
   createMemo,
   createSignal,
@@ -72,6 +76,12 @@ function flipPlacement(
 function resolveAnchorEl(anchorEl: PopperUnstyledProps["anchorEl"]) {
   return typeof anchorEl === "function" ? anchorEl() : anchorEl;
 }
+
+export const PopperTooltipRoot = styled("div", {
+  name: "MuiPopperTooltip",
+  slot: "Root",
+  skipProps: [...skipProps, "component"],
+})();
 
 const PopperTooltip = function PopperTooltip(
   inProps: Omit<PopperUnstyledInProps, "keepMounted" | "transition"> & {
@@ -198,12 +208,16 @@ const PopperTooltip = function PopperTooltip(
     TransitionProps: props.TransitionProps,
   }));
 
+  const c = children(() => {
+    const localChildren = props.children;
+    return typeof localChildren === "function"
+      ? localChildren(childProps())
+      : localChildren;
+  });
   return (
-    <div ref={tooltip} role="tooltip" {...otherProps}>
-      {typeof props.children === "function"
-        ? props.children(childProps())
-        : props.children}
-    </div>
+    <PopperTooltipRoot ref={tooltip} role="tooltip" {...otherProps}>
+      {c()}
+    </PopperTooltipRoot>
   );
 };
 
@@ -231,9 +245,11 @@ const PopperUnstyled = $.component(function PopperUnstyled({
   // If the container prop is provided, use that
   // If the anchorEl prop is provided, use its parent body element as the container
   // If neither are provided let the Modal take care of choosing the container
-  const container = createMemo(
+  // `ownerDocument` is only available on the client, createLazyMemo makes Popper
+  // support ssr as long, as open is false on ssr
+  const container = createLazyMemo(
     () =>
-      props.container ||
+      props.container ??
       (props.anchorEl
         ? ownerDocument(resolveAnchorEl(props.anchorEl) as HTMLElement).body
         : undefined)
