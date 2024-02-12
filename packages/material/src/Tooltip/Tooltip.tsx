@@ -1,13 +1,17 @@
-import { TransitionProps } from "../CtPopperUnstyled";
+import Grow from "../Grow";
+import Popper from "../Popper";
+import useControlled from "../utils/useControlled";
 import { TooltipTypeMap } from "./TooltipProps";
 import tooltipClasses, { getTooltipUtilityClass } from "./tooltipClasses";
 import { resolveFirst } from "@solid-primitives/refs";
-import { PopperPlacementType } from "@suid/base/PopperUnstyled";
+import {
+  PopperPlacementType,
+  TransitionProps,
+} from "@suid/base/PopperUnstyled";
 import createComponentFactory from "@suid/base/createComponentFactory";
 import appendOwnerState from "@suid/base/utils/appendOwnerState";
-import { styled } from "@suid/material";
-import useControlled from "@suid/material/utils/useControlled";
 import { alpha } from "@suid/system";
+import styled from "@suid/system/styled";
 import useTheme from "@suid/system/useTheme";
 import { PropsOf } from "@suid/types";
 import { useIsFocusVisible } from "@suid/utils";
@@ -22,8 +26,6 @@ import {
   Show,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import CtGrow from "~/lib/suid/CtGrow";
-import CtPopper from "~/lib/suid/CtPopper";
 
 type RequireProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
@@ -58,9 +60,9 @@ const $ = createComponentFactory<TooltipTypeMap, OwnerState>()({
   }),
 });
 
-const TooltipPopper = styled(CtPopper, {
-  name: "CtTooltip",
-  slot: "CtPopper",
+const TooltipPopper = styled(Popper, {
+  name: "MuiTooltip",
+  slot: "Popper",
   overridesResolver: (props, styles) => {
     const { ownerState } = props;
 
@@ -255,7 +257,7 @@ const Tooltip = $.defineComponent(function Tooltip(inProps) {
       leaveTouchDelay: 1500,
       placement: "bottom" as PopperPlacementType,
       PopperProps: {} as { [K in any]?: never },
-      TransitionComponent: CtGrow,
+      TransitionComponent: Grow,
     },
     props
   );

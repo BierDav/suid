@@ -19,6 +19,7 @@
     "watch": "tsc --build -w tsconfig.build.json"
   },
   "dependencies": {
+    "@solid-primitives/refs": "^1.0.6",
     "@suid/base": "workspace:*",
     "@suid/css": "workspace:*",
     "@suid/system": "workspace:*",

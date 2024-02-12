@@ -188,6 +188,9 @@ importers:
 
   packages/material:
     dependencies:
+      '@solid-primitives/refs':
+        specifier: ^1.0.6
+        version: 1.0.6(solid-js@1.7.12)
       '@suid/base':
         specifier: workspace:*
         version: link:../base/lib
@@ -3943,6 +3946,15 @@ packages:
       solid-js: ^1.6.12
     dependencies:
       '@solid-primitives/scheduled': 1.4.2(solid-js@1.7.12)
+      '@solid-primitives/utils': 6.2.2(solid-js@1.7.12)
+      solid-js: 1.7.12
+    dev: false
+
+  /@solid-primitives/refs@1.0.6(solid-js@1.7.12):
+    resolution: {integrity: sha512-ruh4YdVMxThEVnvqbpeLXKojW442vpFU8q7dSKtElGOTa31aKOAkRb9BTbdaTwVjN4BEq79fiiYIXozJNl4dSw==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
       '@solid-primitives/utils': 6.2.2(solid-js@1.7.12)
       solid-js: 1.7.12
     dev: false
